@@ -46,6 +46,9 @@ export const api = {
   getCanteen: (canteenId: string) =>
     request<any>(`/api/canteen?canteenId=${canteenId}`),
 
+  listCanteens: () =>
+    request<{ success: boolean; canteens: any[] }>("/api/canteens"),
+
   getMenu: (canteenId: string) =>
     request<any[]>(`/api/canteen/menu?canteenId=${canteenId}`),
 

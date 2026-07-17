@@ -37,10 +37,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const savedToken = await AsyncStorage.getItem("auth_token");
         const savedUser = await AsyncStorage.getItem("auth_user");
         if (savedToken && savedUser) {
-          setToken(savedToken);
-          setUser(JSON.parse(savedUser));
+          const parsed = JSON.parse(savedUser);
+          if (parsed && parsed.id) {
+            setToken(savedToken);
+            setUser(parsed);
+          } else {
+            await AsyncStorage.multiRemove(["auth_token", "auth_user"]);
+          }
         }
-      } catch {}
+      } catch {
+        await AsyncStorage.multiRemove(["auth_token", "auth_user"]);
+      }
       setLoading(false);
     })();
   }, []);

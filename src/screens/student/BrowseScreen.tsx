@@ -10,28 +10,38 @@ import {
 } from "react-native";
 import { api } from "../../api";
 
-const COLLEGES = [
-  { id: "canteen1", name: "Main Canteen", subtitle: "Central food court" },
-  { id: "canteen2", name: "North Block Canteen", subtitle: "Near CS department" },
-  { id: "canteen3", name: "South Block Canteen", subtitle: "Near ECE department" },
-  { id: "canteen4", name: "Cafeteria", subtitle: "Snacks & beverages" },
-];
+interface CanteenItem {
+  id: string;
+  name: string;
+  subtitle?: string;
+}
 
 interface Props {
   navigation: any;
 }
 
 export default function BrowseScreen({ navigation }: Props) {
+  const [canteens, setCanteens] = useState<CanteenItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
-      // We just need to verify the API is reachable
-      await api.getCanteen("canteen1");
-    } catch {}
-    setLoading(false);
-    setRefreshing(false);
+      const res = await api.listCanteens();
+      const list = (res.canteens || []).map((c: any) => ({
+        id: c.id || c._id,
+        name: c.name || "Canteen",
+        subtitle: c.location || c.collegeId || "",
+      }));
+      if (list.length > 0) {
+        setCanteens(list);
+      }
+    } catch {
+      // keep existing list on failure
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -43,10 +53,19 @@ export default function BrowseScreen({ navigation }: Props) {
     fetchData();
   };
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" color="#7c3aed" />
+        <Text style={styles.loadingText}>Loading canteens...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={COLLEGES}
+        data={canteens}
         keyExtractor={(item) => item.id}
         refreshControl={
           <RefreshControl
@@ -60,6 +79,11 @@ export default function BrowseScreen({ navigation }: Props) {
           <View style={styles.header}>
             <Text style={styles.greeting}>Browse Canteens</Text>
             <Text style={styles.subtitle}>Select a canteen to view menu</Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={styles.center}>
+            <Text style={styles.emptyText}>No canteens found</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -152,5 +176,20 @@ const styles = StyleSheet.create({
   arrow: {
     fontSize: 20,
     color: "#d1d5db",
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 80,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#9ca3af",
   },
 });

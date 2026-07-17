@@ -14,6 +14,7 @@ export interface MenuItem {
   price: number;
   category: string;
   image?: string;
+  imageUrl?: string;
   available: boolean;
   requiresChef: boolean;
   canteenId: string;

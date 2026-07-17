@@ -2,6 +2,7 @@ import React from "react";
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
@@ -22,8 +23,21 @@ export default function MenuItemCard({
   onIncrement,
   onDecrement,
 }: Props) {
+  const imgSource = item.imageUrl || item.image;
+
   return (
     <View style={styles.card}>
+      {imgSource ? (
+        <Image
+          source={{ uri: imgSource }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={styles.imagePlaceholder}>
+          <Text style={styles.placeholderEmoji}>🍲</Text>
+        </View>
+      )}
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.description} numberOfLines={2}>
@@ -71,7 +85,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#fff",
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
     marginHorizontal: 16,
     marginVertical: 6,
     shadowColor: "#000",
@@ -81,70 +95,89 @@ const styles = StyleSheet.create({
     elevation: 3,
     alignItems: "center",
   },
+  image: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
+    marginRight: 12,
+    backgroundColor: "#f3f0ff",
+  },
+  imagePlaceholder: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
+    marginRight: 12,
+    backgroundColor: "#f3f0ff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeholderEmoji: {
+    fontSize: 28,
+  },
   info: {
     flex: 1,
     marginRight: 12,
   },
   name: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: "#1f2937",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   description: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#6b7280",
-    lineHeight: 18,
-    marginBottom: 8,
+    lineHeight: 16,
+    marginBottom: 6,
   },
   bottomRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
   },
   price: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: "#7c3aed",
   },
   category: {
-    fontSize: 11,
+    fontSize: 10,
     color: "#9ca3af",
     backgroundColor: "#f3f4f6",
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 6,
     overflow: "hidden",
   },
   addButton: {
     backgroundColor: "#7c3aed",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: 10,
   },
   addButtonText: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 14,
+    fontSize: 13,
   },
   quantityControls: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f5f3ff",
-    borderRadius: 12,
+    borderRadius: 10,
     overflow: "hidden",
   },
   qtyButton: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 8,
   },
   qtyButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: "#7c3aed",
   },
   quantity: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: "#1f2937",
     minWidth: 24,
@@ -152,13 +185,13 @@ const styles = StyleSheet.create({
   },
   unavailableBadge: {
     backgroundColor: "#fee2e2",
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
   },
   unavailableText: {
     color: "#991b1b",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
   },
 });
