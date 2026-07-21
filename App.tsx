@@ -3,7 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View, ActivityIndicator } from "react-native";
+import { Text, View, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import { AuthProvider, AuthContext } from "./src/contexts/AuthContext";
 import LoginScreen from "./src/screens/LoginScreen";
 import BrowseScreen from "./src/screens/student/BrowseScreen";
@@ -47,11 +47,31 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   );
 }
 
+function LogoutButton() {
+  const { logout } = useContext(AuthContext);
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        Alert.alert("Logout", "Are you sure you want to logout?", [
+          { text: "Cancel", style: "cancel" },
+          { text: "Logout", style: "destructive", onPress: () => logout() },
+        ]);
+      }}
+      style={{ marginRight: 16, padding: 4 }}
+    >
+      <Text style={{ fontSize: 20 }}>🚪</Text>
+    </TouchableOpacity>
+  );
+}
+
 function StudentTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTitle: "Violet Bites",
+        headerTitleStyle: { fontWeight: "700", color: VIOLET, fontSize: 18 },
+        headerRight: () => <LogoutButton />,
         tabBarStyle: {
           backgroundColor: "#fff",
           borderTopColor: "#f3f4f6",
@@ -86,7 +106,10 @@ function ChefTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTitle: "Chef Dashboard",
+        headerTitleStyle: { fontWeight: "700", color: VIOLET, fontSize: 18 },
+        headerRight: () => <LogoutButton />,
         tabBarStyle: {
           backgroundColor: "#fff",
           borderTopColor: "#f3f4f6",
@@ -116,7 +139,10 @@ function ServerTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTitle: "Server Dashboard",
+        headerTitleStyle: { fontWeight: "700", color: VIOLET, fontSize: 18 },
+        headerRight: () => <LogoutButton />,
         tabBarStyle: {
           backgroundColor: "#fff",
           borderTopColor: "#f3f4f6",

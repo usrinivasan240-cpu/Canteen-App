@@ -13,19 +13,12 @@ import {
 } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 
-const ROLES = [
-  { value: "student", label: "Student" },
-  { value: "chef", label: "Chef" },
-  { value: "staff", label: "Server" },
-];
-
 export default function LoginScreen() {
   const { login, register } = useContext(AuthContext);
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("student");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -41,9 +34,9 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       if (isRegister) {
-        await register(name, email, password, role);
+        await register(name, email, password);
       } else {
-        await login(email, password, role);
+        await login(email, password);
       }
     } catch (err: any) {
       Alert.alert("Error", err.message || "Something went wrong");
@@ -99,29 +92,6 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             secureTextEntry
           />
-
-          <Text style={styles.roleLabel}>Select Role</Text>
-          <View style={styles.roleContainer}>
-            {ROLES.map((r) => (
-              <TouchableOpacity
-                key={r.value}
-                style={[
-                  styles.roleButton,
-                  role === r.value && styles.roleButtonActive,
-                ]}
-                onPress={() => setRole(r.value)}
-              >
-                <Text
-                  style={[
-                    styles.roleButtonText,
-                    role === r.value && styles.roleButtonTextActive,
-                  ]}
-                >
-                  {r.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
 
           <TouchableOpacity
             style={styles.submitButton}

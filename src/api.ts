@@ -31,16 +31,16 @@ async function request<T>(
 }
 
 export const api = {
-  login: (email: string, password: string, role: string) =>
+  login: (email: string, password: string) =>
     request<{ token: string; user: any }>("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password, role }),
+      body: JSON.stringify({ email, password }),
     }),
 
-  register: (name: string, email: string, password: string, role: string) =>
+  register: (name: string, email: string, password: string) =>
     request<{ token: string; user: any }>("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password }),
     }),
 
   getCanteen: (canteenId: string) =>
