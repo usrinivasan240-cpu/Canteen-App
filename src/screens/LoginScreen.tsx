@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,10 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Picker,
 } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
+import { api } from "../api";
 
 export default function LoginScreen() {
   const { login, register } = useContext(AuthContext);
@@ -19,22 +21,46 @@ export default function LoginScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [registerNumber, setRegisterNumber] = useState("");
+  const [selectedCollegeId, setSelectedCollegeId] = useState("");
+  const [colleges, setColleges] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const data = await api.getColleges();
+        if (data.success && data.colleges) {
+          setColleges(data.colleges.filter((c: any) => c.status === "active"));
+        }
+      } catch (e) {
+        console.error("Failed to fetch colleges", e);
+      }
+    };
+    fetchColleges();
+  }, []);
 
   const handleSubmit = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
-    if (isRegister && !name) {
-      Alert.alert("Error", "Please enter your name");
-      return;
+    if (isRegister) {
+      if (!name || !phone || !registerNumber || !selectedCollegeId) {
+        Alert.alert("Error", "All fields are required for registration");
+        return;
+      }
+      if (phone.length !== 10) {
+        Alert.alert("Error", "Phone number must be 10 digits");
+        return;
+      }
     }
 
     setLoading(true);
     try {
       if (isRegister) {
-        await register(name, email, password);
+        await register(name, email, password, phone, registerNumber, selectedCollegeId);
       } else {
         await login(email, password);
       }
@@ -56,22 +82,75 @@ export default function LoginScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.logo}>🍽️</Text>
-          <Text style={styles.title}>Canteen App</Text>
+          <Text style={styles.title}>Violet Bites</Text>
           <Text style={styles.subtitle}>
             {isRegister ? "Create your account" : "Welcome back!"}
           </Text>
         </View>
 
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity
+            style={[styles.toggleButton, !isRegister && styles.toggleButtonActive]}
+            onPress={() => setIsRegister(false)}
+          >
+            <Text style={[styles.toggleText, !isRegister && styles.toggleTextActive]}>Sign In</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleButton, isRegister && styles.toggleButtonActive]}
+            onPress={() => setIsRegister(true)}
+          >
+            <Text style={[styles.toggleText, isRegister && styles.toggleTextActive]}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.form}>
           {isRegister && (
-            <TextInput
-              style={styles.input}
-              placeholder="Full Name"
-              placeholderTextColor="#9ca3af"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-            />
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Full Name"
+                placeholderTextColor="#9ca3af"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Register Number (e.g. 21CS001)"
+                placeholderTextColor="#9ca3af"
+                value={registerNumber}
+                onChangeText={setRegisterNumber}
+                autoCapitalize="characters"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Phone Number (10 digits)"
+                placeholderTextColor="#9ca3af"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                maxLength={10}
+              />
+
+              <View style={styles.pickerContainer}>
+                <Text style={styles.pickerLabel}>Select College</Text>
+                <View style={styles.pickerWrapper}>
+                  <Picker
+                    selectedValue={selectedCollegeId}
+                    onValueChange={(value) => setSelectedCollegeId(value)}
+                    style={styles.picker}
+                    dropdownIconColor="#7c3aed"
+                  >
+                    <Picker.Item label="-- Choose your college --" value="" color="#9ca3af" />
+                    {colleges.map((c) => (
+                      <Picker.Item key={c.id} label={c.name} value={c.id} color="#1f2937" />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+            </>
           )}
 
           <TextInput
@@ -102,7 +181,7 @@ export default function LoginScreen() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.submitButtonText}>
-                {isRegister ? "Register" : "Login"}
+                {isRegister ? "Create Account" : "Sign In"}
               </Text>
             )}
           </TouchableOpacity>
@@ -113,8 +192,8 @@ export default function LoginScreen() {
           >
             <Text style={styles.switchText}>
               {isRegister
-                ? "Already have an account? Login"
-                : "Don't have an account? Register"}
+                ? "Already have an account? Sign In"
+                : "Don't have an account? Sign Up"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -135,7 +214,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 30,
   },
   logo: {
     fontSize: 64,
@@ -151,6 +230,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6b7280",
   },
+  toggleContainer: {
+    flexDirection: "row",
+    backgroundColor: "#f3e8ff",
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "#e9d5ff",
+  },
+  toggleButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  toggleButtonActive: {
+    backgroundColor: "#7c3aed",
+  },
+  toggleText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#6b7280",
+  },
+  toggleTextActive: {
+    color: "#fff",
+  },
   form: {
     gap: 14,
   },
@@ -163,36 +268,26 @@ const styles = StyleSheet.create({
     borderColor: "#e5e7eb",
     color: "#1f2937",
   },
-  roleLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginTop: 4,
+  pickerContainer: {
+    gap: 6,
   },
-  roleContainer: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  roleButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
-    borderColor: "#e5e7eb",
-    alignItems: "center",
-  },
-  roleButtonActive: {
-    backgroundColor: "#7c3aed",
-    borderColor: "#7c3aed",
-  },
-  roleButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
+  pickerLabel: {
+    fontSize: 12,
+    fontWeight: "700",
     color: "#6b7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
-  roleButtonTextActive: {
-    color: "#fff",
+  pickerWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    overflow: "hidden",
+  },
+  picker: {
+    height: 52,
+    color: "#1f2937",
   },
   submitButton: {
     backgroundColor: "#7c3aed",

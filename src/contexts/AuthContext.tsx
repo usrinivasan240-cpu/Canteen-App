@@ -11,7 +11,10 @@ interface AuthContextType {
   register: (
     name: string,
     email: string,
-    password: string
+    password: string,
+    phone: string,
+    registerNumber: string,
+    collegeId: string
   ) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -60,8 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const register = useCallback(
-    async (name: string, email: string, password: string) => {
-      const res = await api.register(name, email, password);
+    async (name: string, email: string, password: string, phone: string, registerNumber: string, collegeId: string) => {
+      const res = await api.register(name, email, password, phone, registerNumber, collegeId);
       await AsyncStorage.setItem("auth_token", res.token);
       await AsyncStorage.setItem("auth_user", JSON.stringify(res.user));
       setToken(res.token);

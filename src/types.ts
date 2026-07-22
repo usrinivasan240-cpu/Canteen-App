@@ -3,6 +3,9 @@ export interface User {
   name: string;
   email: string;
   role: "student" | "chef" | "staff" | "owner" | "admin" | "superadmin";
+  phone?: string;
+  registerNumber?: string;
+  collegeId?: string;
   canteenId?: string;
   subCanteenId?: string;
 }

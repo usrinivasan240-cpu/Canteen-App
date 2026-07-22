@@ -37,11 +37,14 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
-  register: (name: string, email: string, password: string) =>
+  register: (name: string, email: string, password: string, phone: string, registerNumber: string, collegeId: string) =>
     request<{ token: string; user: any }>("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, role: "customer", phone, registerNumber, collegeId }),
     }),
+
+  getColleges: () =>
+    request<{ success: boolean; colleges: any[] }>("/api/colleges"),
 
   getCanteen: (canteenId: string) =>
     request<any>(`/api/canteen?canteenId=${canteenId}`),
